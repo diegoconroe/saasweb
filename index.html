@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finova - SaaS Financiero</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- Tailwind Config & Custom CSS -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        dark: {
+                            900: '#0a0a0a',
+                            800: '#141414',
+                            700: '#1e1e1e',
+                            600: '#2a2a2a',
+                        },
+                        brand: {
+                            light: '#fde68a',
+                            DEFAULT: '#fbbf24',
+                            dark: '#d97706',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0a0a0a;
+            color: #f3f4f6;
+            overflow-x: hidden;
+        }
+
+        /* Efectos de fondo difuminado (Glow) */
+        .bg-glow {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(217, 119, 6, 0.15) 0%, rgba(10, 10, 10, 0) 70%);
+            top: -200px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Glassmorphism para las tarjetas */
+        .glass-card {
+            background: rgba(30, 30, 30, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 1rem;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Animaciones suaves */
+        .fade-in {
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2a2a2a;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3f3f46;
+        }
+    </style>
+</head>
+<body class="antialiased font-sans relative min-h-screen flex flex-col">
+
+    <!-- Background Glow Effect -->
+    <div class="bg-glow"></div>
+    <div class="absolute top-[800px] left-[-200px] w-[500px] h-[500px] bg-brand-dark/5 rounded-full blur-[100px] -z-10"></div>
+    <div class="absolute top-[1200px] right-[-200px] w-[600px] h-[600px] bg-blue-900/10 rounded-full blur-[120px] -z-10"></div>
+
+    <!-- Navegación -->
+    <header class="fixed top-0 w-full z-50 glass-card !rounded-none !border-t-0 !border-l-0 !border-r-0 border-b border-white/10 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center gap-2 cursor-pointer" onclick="navigate('inicio')">
+                    <i class="ph ph-trend-up text-brand text-3xl"></i>
+                    <span class="font-bold text-xl tracking-tight text-white">Finova</span>
+                </div>
+                
+                <!-- Desktop Menu -->
+                <nav class="hidden md:block">
+                    <ul class="flex space-x-8 text-sm font-medium text-gray-300">
+                        <li><a href="#" onclick="navigate('inicio')" class="hover:text-white transition-colors nav-link" data-target="inicio">Inicio</a></li>
+                        <li><a href="#" onclick="navigate('productos')" class="hover:text-white transition-colors nav-link" data-target="productos">Productos</a></li>
+                        <li><a href="#" onclick="navigate('blog')" class="hover:text-white transition-colors nav-link" data-target="blog">Blog</a></li>
+                        <li><a href="#" onclick="navigate('contactar')" class="hover:text-white transition-colors nav-link" data-target="contactar">Contactar</a></li>
+                    </ul>
+                </nav>
+
+                <!-- Actions -->
+                <div class="hidden md:flex items-center space-x-4">
+                    <a href="#" class="text-sm font-medium text-gray-300 hover:text-white transition-colors">Login</a>
+                    <button class="bg-white text-black px-5 py-2 rounded-full text-sm font-semibold hover:bg-gray-200 transition-colors shadow-[0_0_15px_rgba(255,255,255,0.2)]">
+                        Sign Up
+                    </button>
+                </div>
+
+                <!-- Mobile menu button -->
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-btn" class="text-gray-300 hover:text-white focus:outline-none">
+                        <i class="ph ph-list text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden glass-card !rounded-none border-t border-white/10">
+            <ul class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <li><a href="#" onclick="navigate('inicio'); closeMobileMenu()" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-white/5">Inicio</a></li>
+                <li><a href="#" onclick="navigate('productos'); closeMobileMenu()" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-white/5">Productos</a></li>
+                <li><a href="#" onclick="navigate('blog'); closeMobileMenu()" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-white/5">Blog</a></li>
+                <li><a href="#" onclick="navigate('contactar'); closeMobileMenu()" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-white/5">Contactar</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <!-- Contenedor Principal de Páginas -->
+    <main class="flex-grow pt-28 pb-16">
+
+        <!-- ======================= 
+             PÁGINA: INICIO 
+        ======================== -->
+        <section id="inicio" class="page-section fade-in">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-10">
+                <!-- Badge -->
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm text-xs font-medium text-gray-300 mb-6">
+                    <span class="w-2 h-2 rounded-full bg-brand"></span>
+                    Gestiona tus Finanzas Corporativas
+                </div>
+                
+                <!-- Hero Text -->
+                <h1 class="text-5xl md:text-7xl font-semibold tracking-tight text-white mb-6 leading-tight">
+                    Finanzas de Próxima Generación<br />
+                    para un <span class="font-serif italic font-light text-gray-200">Mundo Digital</span>
+                </h1>
+                
+                <p class="mt-4 max-w-2xl text-lg text-gray-400 mx-auto mb-10">
+                    Experimenta una potente plataforma financiera que proporciona insights analíticos, automatización y control total sobre tu dinero.
+                </p>
+                
+                <!-- Hero Buttons -->
+                <div class="flex flex-col sm:flex-row justify-center items-center gap-4 mb-20">
+                    <button class="bg-white text-black px-8 py-3 rounded-full text-base font-semibold hover:bg-gray-200 transition-colors w-full sm:w-auto flex items-center justify-center gap-2">
+                        Comenzar Gratis <i class="ph ph-arrow-right"></i>
+                    </button>
+                    <button class="glass-card px-8 py-3 rounded-full text-base font-semibold text-white hover:bg-white/10 transition-colors w-full sm:w-auto">
+                        Saber más
+                    </button>
+                </div>
+
+                <!-- Dashboard Mockups (CSS based) -->
+                <div class="relative max-w-5xl mx-auto h-[400px] md:h-[500px] flex justify-center items-center">
+                    
+                    <!-- Left Card -->
+                    <div class="hidden md:block absolute left-0 top-20 w-72 glass-card p-5 transform -rotate-6 shadow-2xl opacity-80 hover:opacity-100 transition-all duration-500 hover:-translate-y-4 hover:rotate-0 z-10">
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-sm font-medium text-gray-300">Historial de Transacciones</span>
+                            <i class="ph ph-dots-three text-xl text-gray-500"></i>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center text-green-400"><i class="ph ph-spotify-logo"></i></div>
+                                    <div class="text-left"><p class="text-sm text-white">Spotify</p><p class="text-xs text-gray-500">Suscripción</p></div>
+                                </div>
+                                <span class="text-sm text-white font-medium">-$12.99</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400"><i class="ph ph-paypal-logo"></i></div>
+                                    <div class="text-left"><p class="text-sm text-white">PayPal Transfer</p><p class="text-xs text-gray-500">Recibido</p></div>
+                                </div>
+                                <span class="text-sm text-green-400 font-medium">+$250.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Center Main Card -->
+                    <div class="absolute z-20 w-[90%] max-w-sm glass-card p-6 border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.7)] transform hover:-translate-y-2 transition-transform duration-500">
+                        <div class="flex justify-between items-center mb-6">
+                            <div class="flex items-center gap-3">
+                                <img src="https://ui-avatars.com/api/?name=Edgar+Gomez&background=random" alt="Avatar" class="w-10 h-10 rounded-full">
+                                <div class="text-left">
+                                    <p class="text-xs text-gray-400">Buenos días,</p>
+                                    <p class="text-sm font-semibold text-white">Edgar Gomez</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10"><i class="ph ph-bell text-gray-300"></i></button>
+                                <button class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10"><i class="ph ph-magnifying-glass text-gray-300"></i></button>
+                            </div>
+                        </div>
+                        <div class="text-left mb-6">
+                            <p class="text-sm text-gray-400 mb-1">Balance Total</p>
+                            <h2 class="text-4xl font-bold text-white tracking-tight">$56,893.30</h2>
+                            <p class="text-xs text-green-400 mt-2 flex items-center gap-1"><i class="ph ph-trend-up"></i> +2.4% este mes</p>
+                        </div>
+                        <div class="flex gap-3">
+                            <button class="flex-1 glass-card py-2 text-sm text-white hover:bg-white/10 transition flex justify-center items-center gap-2"><i class="ph ph-paper-plane-tilt"></i> Enviar</button>
+                            <button class="flex-1 bg-white text-black rounded-lg py-2 text-sm font-semibold hover:bg-gray-200 transition flex justify-center items-center gap-2"><i class="ph ph-plus"></i> Añadir</button>
+                        </div>
+                    </div>
+
+                    <!-- Right Card -->
+                    <div class="hidden md:block absolute right-0 top-32 w-72 glass-card p-5 transform rotate-6 shadow-2xl opacity-80 hover:opacity-100 transition-all duration-500 hover:-translate-y-4 hover:rotate-0 z-10">
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-sm font-medium text-gray-300">Plan de Ahorro</span>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="bg-white/5 rounded-lg p-3">
+                                <div class="flex justify-between text-sm mb-2 text-white">
+                                    <span>Fondo Inversión</span>
+                                    <span>70%</span>
+                                </div>
+                                <div class="w-full bg-dark-800 rounded-full h-1.5">
+                                    <div class="bg-brand h-1.5 rounded-full" style="width: 70%"></div>
+                                </div>
+                            </div>
+                            <div class="bg-white/5 rounded-lg p-3">
+                                <div class="flex justify-between text-sm mb-2 text-white">
+                                    <span>Fondo Emergencia</span>
+                                    <span>35%</span>
+                                </div>
+                                <div class="w-full bg-dark-800 rounded-full h-1.5">
+                                    <div class="bg-red-500 h-1.5 rounded-full" style="width: 35%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Social Proof -->
+            <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 border-t border-white/5 pt-12">
+                <p class="text-center text-sm text-gray-500 mb-8 uppercase tracking-widest font-semibold">Empresas que confían en nosotros</p>
+                <div class="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
+                    <div class="flex items-center gap-2 text-xl font-bold"><i class="ph ph-stripe-logo text-3xl"></i> Stripe</div>
+                    <div class="flex items-center gap-2 text-xl font-bold"><i class="ph ph-amazon-logo text-3xl"></i> Amazon</div>
+                    <div class="flex items-center gap-2 text-xl font-bold"><i class="ph ph-slack-logo text-3xl"></i> Slack</div>
+                    <div class="flex items-center gap-2 text-xl font-bold"><i class="ph ph-figma-logo text-3xl"></i> Figma</div>
+                </div>
+            </div>
+            
+            <!-- Features Overview (Brief) -->
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-32 text-left">
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <h3 class="text-3xl md:text-4xl font-semibold mb-6">Simplificamos las finanzas con <span class="font-serif italic font-light">herramientas inteligentes</span></h3>
+                        <p class="text-gray-400 text-lg mb-8">Te ayudamos a gestionar, crecer y controlar tu dinero. Mejorando tus finanzas mediante soluciones modernas e intuitivas. Nuestro panel te da insights en tiempo real del rendimiento de tu capital.</p>
+                        <ul class="space-y-4">
+                            <li class="flex items-center gap-3 text-gray-300"><i class="ph ph-check-circle text-brand text-xl"></i> Cuentas Multi-Divisa</li>
+                            <li class="flex items-center gap-3 text-gray-300"><i class="ph ph-check-circle text-brand text-xl"></i> Automatización de Facturas</li>
+                            <li class="flex items-center gap-3 text-gray-300"><i class="ph ph-check-circle text-brand text-xl"></i> Reportes con IA</li>
+                        </ul>
+                    </div>
+                    <div class="glass-card p-2">
+                        <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800" alt="Dashboard Chart" class="rounded-lg opacity-80 mix-blend-luminosity hover:mix-blend-normal transition-all duration-500 w-full">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======================= 
+             PÁGINA: PRODUCTOS (Pricing)
+        ======================== -->
+        <section id="productos" class="page-section hidden fade-in">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-10">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm text-xs font-medium text-gray-300 mb-6">
+                    <span class="w-2 h-2 rounded-full bg-brand"></span>
+                    Planes Transparentes
+                </div>
+                <h2 class="text-4xl md:text-5xl font-semibold tracking-tight text-white mb-4">
+                    Elige el plan perfecto para tu <span class="font-serif italic font-light">Crecimiento</span>
+                </h2>
+                <p class="mt-4 max-w-2xl text-lg text-gray-400 mx-auto mb-16">
+                    Sin tarifas ocultas. Comienza gratis y escala a medida que tu negocio o finanzas personales crezcan.
+                </p>
+
+                <!-- Pricing Cards -->
+                <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto text-left">
+                    
+                    <!-- Básico -->
+                    <div class="glass-card p-8 border-t-4 border-t-gray-600 hover:-translate-y-2 transition-transform duration-300 flex flex-col">
+                        <h3 class="text-2xl font-bold text-white mb-2">Básico</h3>
+                        <p class="text-gray-400 text-sm mb-6">Para individuos y freelancers comenzando.</p>
+                        <div class="mb-6">
+                            <span class="text-4xl font-bold text-white">$0</span>
+                            <span class="text-gray-500">/mes</span>
+                        </div>
+                        <ul class="space-y-4 mb-8 flex-grow">
+                            <li class="flex items-center gap-3 text-sm text-gray-300"><i class="ph ph-check text-green-400"></i> Hasta 2 cuentas bancarias</li>
+                            <li class="flex items-center gap-3 text-sm text-gray-300"><i class="ph ph-check text-green-400"></i> Análisis de gastos básicos</li>
+                            <li class="flex items-center gap-3 text-sm text-gray-300"><i class="ph ph-check text-green-400"></i> Soporte por email</li>
+                        </ul>
+                        <!-- Botón WhatsApp -->
+                        <a href="https://wa.me/51924871207?text=Hola,%20estoy%20interesado%20en%20empezar%20con%20el%20plan%20Básico%20de%20Finova." target="_blank" rel="noopener noreferrer" class="w-full block text-center glass-card py-3 text-sm font-semibold text-white hover:bg-white/10 transition-colors">
+                            Comprar Básico
+                        </a>
+                    </div>
+
+                    <!-- Pro (Destacado) -->
+                    <div class="glass-card p-8 border border-brand/50 shadow-[0_0_30px_rgba(217,119,6,0.15)] relative transform md:-translate-y-4 flex flex-col">
+                        <div class="absolute top-0 right-0 bg-brand text-black text-xs font-bold px-3 py-1 rounded-bl-lg rounded-tr-lg">POPULAR</div>
+                        <h3 class="text-2xl font-bold text-white mb-2">Pro</h3>
+                        <p class="text-gray-400 text-sm mb-6">Para profesionales y pequeñas empresas.</p>
+                        <div class="mb-6">
+                            <span class="text-4xl font-bold text-white">$29</span>
+                            <span class="text-gray-500">/mes</span>
+                        </div>
+                        <ul class="space-y-4 mb-8 flex-grow">
+                            <li class="flex items-center gap-3 text-sm text-gray-300"><i class="ph ph-check text-green-400"></i> Cuentas ilimitadas</li>
+                            <li class="flex items-center gap-3 text-sm text-gray-300"><i class="ph ph-check text-green-400"></i> Automatización avanzada</li>
+                            <li class="flex items-center gap-3 text-sm text-gray-300"><i class="ph ph-check text-green-400"></i> Reportes personalizados con IA</li>
+                            <li class="flex items-center gap-3 text-sm text-gray-300"><i class="ph ph-check text-green-400"></i> Soporte prioritario 24/7</li>
+                        </ul>
+                        <!-- Botón WhatsApp -->
+                        <a href="https://wa.me/51924871207?text=Hola,%20deseo%20adquirir%20el%20plan%20Pro%20($29/mes)%20de%20Finova." target="_blank" rel="noopener noreferrer" class="w-full block text-center bg-white text-black py-3 rounded-lg text-sm font-semibold hover:bg-gray-200 transition-colors shadow-lg shadow-white/10">
+                            Comprar Pro
+                        </a>
+                    </div>
+
+                    <!-- Empresarial -->
+                    <div class="glass-card p-8 border-t-4 border-t-gray-600 hover:-translate-y-2 transition-transform duration-300 flex flex-col">
+                        <h3 class="text-2xl font-bold text-white mb-2">Empresarial</h3>
+                        <p class="text-gray-400 text-sm mb-6">Soluciones a medida para grandes equipos.</p>
+                        <div class="mb-6">
+                            <span class="text-4xl font-bold text-white">$99</span>
+                            <span class="text-gray-500">/mes</span>
+                        </div>
+                        <ul class="space-y-4 mb-8 flex-grow">
+                            <li class="flex items-center gap-3 text-sm text-gray-300"><i class="ph ph-check text-green-400"></i> Todo lo de Pro</li>
+                            <li class="flex items-center gap-3 text-sm text-gray-300"><i class="ph ph-check text-green-400"></i> Múltiples usuarios y roles</li>
+                            <li class="flex items-center gap-3 text-sm text-gray-300"><i class="ph ph-check text-green-400"></i> API de integración</li>
+                            <li class="flex items-center gap-3 text-sm text-gray-300"><i class="ph ph-check text-green-400"></i> Account Manager dedicado</li>
+                        </ul>
+                        <!-- Botón WhatsApp -->
+                        <a href="https://wa.me/51924871207?text=Hola,%20represento%20a%20una%20empresa%20y%20me%20interesa%20el%20plan%20Empresarial%20de%20Finova." target="_blank" rel="noopener noreferrer" class="w-full block text-center glass-card py-3 text-sm font-semibold text-white hover:bg-white/10 transition-colors">
+                            Contactar Ventas
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======================= 
+             PÁGINA: BLOG 
+        ======================== -->
+        <section id="blog" class="page-section hidden fade-in">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10">
+                <div class="text-center mb-16">
+                    <h2 class="text-4xl md:text-5xl font-semibold tracking-tight text-white mb-4">
+                        Insights y <span class="font-serif italic font-light">Noticias</span>
+                    </h2>
+                    <p class="text-gray-400 max-w-2xl mx-auto">Aprende estrategias financieras, descubre nuevas funciones del producto y lee sobre el futuro de las finanzas digitales.</p>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-8">
+                    <!-- Post 1 -->
+                    <article class="glass-card overflow-hidden group cursor-pointer hover:-translate-y-1 transition-transform">
+                        <div class="h-48 bg-dark-800 relative overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&q=80&w=600" alt="Finanzas Moviles" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500">
+                        </div>
+                        <div class="p-6">
+                            <div class="flex items-center gap-2 text-xs text-brand mb-3 font-semibold">
+                                <span>TENDENCIAS</span> • <span>5 MIN READ</span>
+                            </div>
+                            <h3 class="text-xl font-bold text-white mb-2 group-hover:text-brand transition-colors">El futuro de las finanzas descentralizadas en 2026</h3>
+                            <p class="text-gray-400 text-sm mb-4 line-clamp-3">Descubre cómo la IA y el blockchain están remodelando la forma en que las empresas gestionan la tesorería a nivel global.</p>
+                            <span class="text-sm text-white font-medium flex items-center gap-1">Leer artículo <i class="ph ph-arrow-right"></i></span>
+                        </div>
+                    </article>
+
+                    <!-- Post 2 -->
+                    <article class="glass-card overflow-hidden group cursor-pointer hover:-translate-y-1 transition-transform">
+                        <div class="h-48 bg-dark-800 relative overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=600" alt="Análisis" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500">
+                        </div>
+                        <div class="p-6">
+                            <div class="flex items-center gap-2 text-xs text-brand mb-3 font-semibold">
+                                <span>TUTORIAL</span> • <span>3 MIN READ</span>
+                            </div>
+                            <h3 class="text-xl font-bold text-white mb-2 group-hover:text-brand transition-colors">5 formas de automatizar tus gastos mensuales</h3>
+                            <p class="text-gray-400 text-sm mb-4 line-clamp-3">Aprende a configurar reglas inteligentes en Finova para que no vuelvas a preocuparte por categorizar tus facturas.</p>
+                            <span class="text-sm text-white font-medium flex items-center gap-1">Leer artículo <i class="ph ph-arrow-right"></i></span>
+                        </div>
+                    </article>
+
+                    <!-- Post 3 -->
+                    <article class="glass-card overflow-hidden group cursor-pointer hover:-translate-y-1 transition-transform">
+                        <div class="h-48 bg-dark-800 relative overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1573164713988-8665fc963095?auto=format&fit=crop&q=80&w=600" alt="Equipo" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500">
+                        </div>
+                        <div class="p-6">
+                            <div class="flex items-center gap-2 text-xs text-brand mb-3 font-semibold">
+                                <span>PRODUCTO</span> • <span>4 MIN READ</span>
+                            </div>
+                            <h3 class="text-xl font-bold text-white mb-2 group-hover:text-brand transition-colors">Nueva actualización: Permisos de equipo avanzados</h3>
+                            <p class="text-gray-400 text-sm mb-4 line-clamp-3">Lanzamos una nueva estructura de roles para que puedas invitar a contadores y gerentes con accesos limitados.</p>
+                            <span class="text-sm text-white font-medium flex items-center gap-1">Leer artículo <i class="ph ph-arrow-right"></i></span>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======================= 
+             PÁGINA: CONTACTAR 
+        ======================== -->
+        <section id="contactar" class="page-section hidden fade-in">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-10">
+                <div class="glass-card p-8 md:p-12">
+                    <div class="text-center mb-10">
+                        <h2 class="text-3xl md:text-4xl font-semibold tracking-tight text-white mb-2">
+                            Ponte en <span class="font-serif italic font-light">Contacto</span>
+                        </h2>
+                        <p class="text-gray-400">¿Tienes dudas o necesitas un plan a medida? Escríbenos.</p>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-12">
+                        <!-- Contact Info -->
+                        <div>
+                            <h3 class="text-xl font-bold text-white mb-6">Información Directa</h3>
+                            <div class="space-y-6">
+                                <div class="flex items-start gap-4">
+                                    <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-brand flex-shrink-0">
+                                        <i class="ph ph-whatsapp-logo text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-400">WhatsApp (Perú)</p>
+                                        <a href="https://wa.me/51924871207" target="_blank" class="text-lg text-white font-medium hover:text-brand transition">+51 924 871 207</a>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-4">
+                                    <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-brand flex-shrink-0">
+                                        <i class="ph ph-envelope text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-400">Email Soporte</p>
+                                        <p class="text-lg text-white font-medium">hola@finova-saas.com</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-4">
+                                    <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-brand flex-shrink-0">
+                                        <i class="ph ph-map-pin text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-400">Oficina Principal</p>
+                                        <p class="text-base text-white font-medium">Lima, Perú<br>Distrito Financiero, San Isidro</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form -->
+                        <form class="space-y-4" onsubmit="event.preventDefault(); alert('Mensaje simulado enviado. Para compras usa los botones de WhatsApp en la pestaña Productos.');">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-400 mb-1">Nombre Completo</label>
+                                <input type="text" required class="w-full bg-dark-900 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-colors placeholder-gray-600" placeholder="Ej. Juan Pérez">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-400 mb-1">Correo Electrónico</label>
+                                <input type="email" required class="w-full bg-dark-900 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-colors placeholder-gray-600" placeholder="juan@empresa.com">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-400 mb-1">Mensaje</label>
+                                <textarea rows="4" required class="w-full bg-dark-900 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-colors placeholder-gray-600 resize-none" placeholder="¿Cómo podemos ayudarte?"></textarea>
+                            </div>
+                            <button type="submit" class="w-full bg-white text-black rounded-lg py-3 text-sm font-semibold hover:bg-gray-200 transition-colors">
+                                Enviar Mensaje
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/10 bg-dark-900 mt-auto py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-4 gap-8">
+            <div class="col-span-1 md:col-span-1">
+                <div class="flex items-center gap-2 mb-4">
+                    <i class="ph ph-trend-up text-brand text-2xl"></i>
+                    <span class="font-bold text-lg text-white">Finova</span>
+                </div>
+                <p class="text-sm text-gray-400 mb-4">La plataforma moderna para gestionar tus finanzas en el mundo digital.</p>
+            </div>
+            <div>
+                <h4 class="text-white font-semibold mb-4">Producto</h4>
+                <ul class="space-y-2 text-sm text-gray-400">
+                    <li><a href="#" class="hover:text-white transition">Características</a></li>
+                    <li><a href="#" onclick="navigate('productos')" class="hover:text-white transition">Precios</a></li>
+                    <li><a href="#" class="hover:text-white transition">Seguridad</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-white font-semibold mb-4">Compañía</h4>
+                <ul class="space-y-2 text-sm text-gray-400">
+                    <li><a href="#" class="hover:text-white transition">Sobre Nosotros</a></li>
+                    <li><a href="#" onclick="navigate('blog')" class="hover:text-white transition">Blog</a></li>
+                    <li><a href="#" class="hover:text-white transition">Carreras</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-white font-semibold mb-4">Soporte</h4>
+                <ul class="space-y-2 text-sm text-gray-400">
+                    <li><a href="#" onclick="navigate('contactar')" class="hover:text-white transition">Contactar</a></li>
+                    <li><a href="#" class="hover:text-white transition">Centro de Ayuda</a></li>
+                    <li><a href="#" class="hover:text-white transition">Términos de Servicio</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 pt-8 border-t border-white/5 text-center text-sm text-gray-500">
+            &copy; 2026 Finova SaaS. Todos los derechos reservados.
+        </div>
+    </footer>
+
+    <!-- JavaScript para Navegación tipo SPA -->
+    <script>
+        // Navegación principal
+        function navigate(pageId) {
+            // Ocultar todas las secciones
+            document.querySelectorAll('.page-section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('fade-in');
+            });
+            
+            // Mostrar la sección objetivo
+            const targetSection = document.getElementById(pageId);
+            if(targetSection) {
+                targetSection.classList.remove('hidden');
+                // Forzar reflujo para reiniciar la animación
+                void targetSection.offsetWidth;
+                targetSection.classList.add('fade-in');
+            }
+            
+            // Actualizar el estado activo en el menú (opcional)
+            document.querySelectorAll('.nav-link').forEach(link => {
+                if(link.getAttribute('data-target') === pageId) {
+                    link.classList.add('text-white');
+                    link.classList.remove('text-gray-300');
+                } else {
+                    link.classList.remove('text-white');
+                    link.classList.add('text-gray-300');
+                }
+            });
+
+            // Scrollear hacia arriba
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Menú móvil toggle
+        const btn = document.getElementById('mobile-menu-btn');
+        const menu = document.getElementById('mobile-menu');
+
+        btn.addEventListener('click', () => {
+            menu.classList.toggle('hidden');
+        });
+
+        function closeMobileMenu() {
+            menu.classList.add('hidden');
+        }
+
+        // Inicializar la página activa visualmente
+        document.querySelector('[data-target="inicio"]').classList.add('text-white');
+        document.querySelector('[data-target="inicio"]').classList.remove('text-gray-300');
+    </script>
+</body>
+</html>
